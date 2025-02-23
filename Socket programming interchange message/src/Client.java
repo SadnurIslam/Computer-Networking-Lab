@@ -1,39 +1,40 @@
 import java.io.*;
-import java.net.Socket;
+import java.net.*;
 
 public class Client {
+    public static void main(String[] args) {
+        try {
+            // Connect to the server (change IP if running on a different machine)
+            String serverIP = "127.0.0.1"; // Replace with actual server IP if needed
+            Socket socket = new Socket(serverIP, 12345);
+            System.out.println("Connected to the server. Type 'exit' to disconnect.");
 
-    public static void main(String[] args) throws Exception{
+            // Create input and output streams
+            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
+            BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
 
-        Socket s2= new Socket("localhost", 7777);
+            // Communication loop
+            String message;
+            while (true) {
+                System.out.print("Client: ");
+                message = userInput.readLine();
+                output.println(message);
 
-        BufferedReader input = new BufferedReader(new InputStreamReader(s2.getInputStream()));
-        PrintWriter output = new PrintWriter(s2.getOutputStream(), true);
-        BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
-
-        System.out.println("Connected to the server. Type 'quit' to disconnect.");
-
-        String message="";
-        while(true){
-            System.out.print("Client: ");
-            message = userInput.readLine();
-            output.println(message);
-            output.flush();
-            if(message.equals("quit")){
-                break;
-            }
-            else if(message.equals("ok")){
-                for(int i=1;i<=9;i++){
-                    String response = input.readLine();
-                    System.out.println("Server: " + response);
+                if (message.equalsIgnoreCase("exit")) {
+                    break;
                 }
-            }
-            else{
+
                 String response = input.readLine();
                 System.out.println("Server: " + response);
             }
 
+            // Close resources
+            input.close();
+            output.close();
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        s2.close();
     }
 }

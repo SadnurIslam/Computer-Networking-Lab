@@ -1,54 +1,45 @@
 import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Date;
+import java.net.*;
 
 public class Server {
+    public static void main(String[] args) {
+        try {
+            // Create a server socket listening on port 12345
+            ServerSocket serverSocket = new ServerSocket(12345);
+            System.out.println("Server is waiting for a client...");
 
-    public static void main(String[] args) throws Exception{
+            // Accept client connection
+            Socket socket = serverSocket.accept();
+            System.out.println("Connected to " + socket.getInetAddress());
 
-        ServerSocket ss= new ServerSocket(7777);
-        Socket s1=ss.accept();
+            // Create input and output streams
+            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
 
-        BufferedReader input = new BufferedReader(new InputStreamReader(s1.getInputStream()));
-        PrintWriter output = new PrintWriter(s1.getOutputStream(), true);
-
-        System.out.println("Connected to " + s1.getInetAddress());
-
-        String message;
-        while(true){
-            message = input.readLine();
-            System.out.println("Client: " + message);
-            String reply = "";
-            if(message.equalsIgnoreCase("quit")){
-                break;
-            }
-            else if(message.equalsIgnoreCase("hi")){
-                reply="hello";
-                output.println(reply);
-            }
-            else if(message.equalsIgnoreCase("ok")){
-                reply ="ok";
-                for(int i=1;i<=9;i++){
-                    output.println(reply);
+            // Communication loop
+            String message;
+            while (true) {
+                message = input.readLine();
+                if (message == null || message.equalsIgnoreCase("exit")) {
+                    System.out.println("Client disconnected.");
+                    break;
                 }
-            }
-            else if(message.equalsIgnoreCase("date")){
-                Date date=new Date();
-                reply=date.toString();
-                output.println(reply);
-            }
-            else{
-                reply="unknown command";
-                output.println(reply);
-            }
-            System.out.println("Server: "+reply);
+                System.out.println("Client: " + message);
 
+                // Send response
+                System.out.print("Server: ");
+                BufferedReader serverInput = new BufferedReader(new InputStreamReader(System.in));
+                String reply = serverInput.readLine();
+                output.println(reply);
+            }
+
+            // Close resources
+            input.close();
+            output.close();
+            socket.close();
+            serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        ss.close();
-        s1.close();
-
     }
-
-
 }
